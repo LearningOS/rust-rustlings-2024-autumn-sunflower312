@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +22,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![],
             comparator,
         }
     }
@@ -37,11 +36,13 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        self.sift_up(self.count - 1);
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
-        idx / 2
+        (idx - 1) / 2
     }
 
     fn children_present(&self, idx: usize) -> bool {
@@ -49,16 +50,67 @@ where
     }
 
     fn left_child_idx(&self, idx: usize) -> usize {
-        idx * 2
+        idx * 2 + 1
     }
 
     fn right_child_idx(&self, idx: usize) -> usize {
         self.left_child_idx(idx) + 1
     }
 
-    fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+    fn sift_up(&mut self, idx: usize) -> () {
+        let mut current = idx;
+
+        while current > 0 {
+            let parent = self.parent_idx(current);
+
+            if (self.comparator)(&self.items[current], &self.items[parent]) {
+                self.items.swap(current, parent);
+                current = parent;
+            }
+            else {
+                break;
+            }
+        }
+    }
+
+    fn sift_down(&mut self, mut idx: usize) {
+        loop {
+            let left = self.left_child_idx(idx);
+            let right = self.right_child_idx(idx);
+            let mut target = idx;
+
+            if left < self.count && (self.comparator)(&self.items[left], &self.items[target]) {
+                target = left;
+            }
+
+            if right < self.count && (self.comparator)(&self.items[right], &self.items[target]) {
+                target = right;
+            }
+
+            if target != idx {
+                self.items.swap(idx, target);
+                idx = target;
+            } else {
+                break;
+            }
+        }
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        if self.count == 0 {
+            return None;
+        }
+
+        self.items.swap(0, self.count - 1);
+        self.count -= 1;
+
+        let popped = self.items.pop();
+
+        if self.count > 0 {
+            self.sift_down(0);
+        }
+
+        popped
     }
 }
 
@@ -84,8 +136,7 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        self.pop()
     }
 }
 
