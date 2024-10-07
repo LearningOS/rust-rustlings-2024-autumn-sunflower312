@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -70,14 +69,66 @@ impl<T> LinkedList<T> {
         }
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+    where
+        T: Ord,
+    {
+        let mut merged = LinkedList::new();
+
+        let mut a_ptr = list_a.start;
+        let mut b_ptr = list_b.start;
+
+        while a_ptr.is_some() && b_ptr.is_some() {
+            unsafe {
+                let a_node = a_ptr.unwrap().as_ref();
+                let b_node = b_ptr.unwrap().as_ref();
+
+                if a_node.val <= b_node.val {
+                    let next_a = a_node.next;
+                    if merged.end.is_none() {
+                        merged.start = a_ptr;
+                    } else {
+                        merged.end.unwrap().as_mut().next = a_ptr;
+                    }
+                    merged.end = a_ptr;
+                    a_ptr = next_a;
+                } else {
+                    let next_b = b_node.next;
+                    if merged.end.is_none() {
+                        merged.start = b_ptr;
+                    } else {
+                        merged.end.unwrap().as_mut().next = b_ptr;
+                    }
+                    merged.end = b_ptr;
+
+                    b_ptr = next_b;
+                }
+            }
         }
-	}
+
+        unsafe {
+            if a_ptr.is_some() {
+                if merged.end.is_none() {
+                    merged.start = a_ptr;
+                } else {
+                    merged.end.unwrap().as_mut().next = a_ptr;
+                }
+                merged.end = list_a.end;
+            }
+
+            if b_ptr.is_some() {
+                if merged.end.is_none() {
+                    merged.start = b_ptr;
+                } else {
+                    merged.end.unwrap().as_mut().next = b_ptr;
+                }
+                merged.end = list_b.end;
+            }
+        }
+
+        merged.length = list_a.length + list_b.length;
+
+        merged
+    }
 }
 
 impl<T> Display for LinkedList<T>
